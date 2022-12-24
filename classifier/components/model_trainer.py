@@ -7,6 +7,8 @@ from xgboost import XGBClassifier
 from classifier import utils
 from sklearn.metrics import f1_score
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics  import roc_auc_score,accuracy_score
 
 
 class ModelTrainer:
@@ -20,9 +22,25 @@ class ModelTrainer:
         except Exception as e :
             raise ClassifierException(e,sys)
 
-    def fine_tune(self):
+    def fine_tune(self,x_train,y_train):
         try:
-            pass
+            #initializing with different combination of parameters
+            self.param_grid = {"n_estimators":[10,50,100,130],"criterion": ['gini','entropy'],"max_depth": range(2,4,1),"max_features":['auto','log2']}
+
+            #Creating an object of grid search class
+            self.grid = GridSearchCV(estimator=self.clf, param_grid=self.param_grid, cv=5,  verbose=3)
+
+            #finding the best parameters
+            self.grid.fit(x_train, y_train)
+
+            #extracting the best parameters
+            self.criterion = self.grid.best_params_['criterion']
+            self.max_depth = self.grid.best_params_['max_depth']
+            self.max_features = self.grid.best_params_['max_features']
+            self.n_estimators = self.grid.best_params_['n_estimators']
+
+
+            
         except Exception as e:
             raise ClassifierException(e,sys)
 
