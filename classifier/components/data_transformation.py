@@ -8,7 +8,6 @@ import pandas as pd
 from classifier import utils
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
-
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from classifier.config import TARGET_COLUMN
@@ -53,7 +52,8 @@ class DataTransformation:
             #selecting input feature for train and test dataframe
             input_feature_train_df=train_df.drop(TARGET_COLUMN,axis=1)
             input_feature_test_df=test_df.drop(TARGET_COLUMN,axis=1)
-
+            
+            #converting our non-numerical columns to numerical except Target column
             labelencoder=LabelEncoder()
             for column in input_feature_train_df.columns:
                 input_feature_train_df[column] = labelencoder.fit_transform(input_feature_train_df[column])
@@ -66,7 +66,8 @@ class DataTransformation:
             #selecting target feature for train and test dataframe
             target_feature_train_df = train_df[TARGET_COLUMN]
             target_feature_test_df = test_df[TARGET_COLUMN]
-
+            
+            #converting our Target non-numerical column to numerical
             label_encoder = LabelEncoder()
             label_encoder.fit(target_feature_train_df)
 
