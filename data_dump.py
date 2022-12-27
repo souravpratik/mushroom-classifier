@@ -1,9 +1,9 @@
 import pymongo
 import pandas as pd
 import json
+from classifier.config import mongo_client
 
-# Provide the mongodb localhost url to connect python to mongodb.
-client = pymongo.MongoClient("mongodb://localhost:27017")
+
 
 DATA_FILE_PATH="/config/workspace/mushrooms.csv"
 DATABASE_NAME="mushroom"
@@ -19,4 +19,6 @@ if __name__== "__main__":
     json_record =list(json.loads(df.T.to_json()).values())
     print(json_record[0])
 
-    client[DATABASE_NAME][COLLECTION_NAME].insert_many(json_record)
+    #insert converted json record to mongo db
+
+    mongo_client[DATABASE_NAME][COLLECTION_NAME].insert_many(json_record)
