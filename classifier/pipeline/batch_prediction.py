@@ -40,6 +40,7 @@ def start_batch_prediction(input_file_path):
         
 
         df["prediction"]=prediction
+        df["prediction"].replace({1.0:"Poisonous",0.0:"Edible"},inplace=True)
         
 
 
