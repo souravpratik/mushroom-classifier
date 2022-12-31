@@ -10,6 +10,40 @@ from sklearn.preprocessing import LabelEncoder
 PREDICTION_DIR="prediction"
 
 import numpy as np
+
+class MultiColumnLabelEncoder:
+
+    def __init__(self, columns=None):
+        self.columns = columns # array of column names to encode
+
+
+    def fit(self, X, y=None):
+        self.encoders = {}
+        columns = X.columns if self.columns is None else self.columns
+        for col in columns:
+            self.encoders[col] = LabelEncoder().fit(X[col])
+        return self
+
+
+    def transform(self, X):
+        output = X.copy()
+        columns = X.columns if self.columns is None else self.columns
+        for col in columns:
+            output[col] = self.encoders[col].transform(X[col])
+        return output
+
+
+    def fit_transform(self, X, y=None):
+        return self.fit(X,y).transform(X)
+
+
+    def inverse_transform(self, X):
+        output = X.copy()
+        columns = X.columns if self.columns is None else self.columns
+        for col in columns:
+            output[col] = self.encoders[col].inverse_transform(X[col])
+        return output
+
 def start_batch_prediction(input_file_path):
     try:
         os.makedirs(PREDICTION_DIR,exist_ok=True)
@@ -19,9 +53,12 @@ def start_batch_prediction(input_file_path):
         df = pd.read_csv(input_file_path)
         df.replace({"?":np.NAN},inplace=True)
        
-        labelencoder=LabelEncoder()
+        l=[]
         for column in df.drop(TARGET_COLUMN,axis=1).columns:
-            df[column] = labelencoder.fit_transform(df[column])
+            l.append(column)
+
+        multi = MultiColumnLabelEncoder(columns=l)
+        df = multi.fit_transform(df)
         #validation
         
         logging.info(f"Loading transformer to transform dataset")
@@ -38,7 +75,7 @@ def start_batch_prediction(input_file_path):
         target_encoder = load_object(file_path=model_resolver.get_latest_target_encoder_path())
 
         
-
+        df = multi.inverse_transform(df)
         df["prediction"]=prediction
         df["prediction"].replace({1.0:"Poisonous",0.0:"Edible"},inplace=True)
         
